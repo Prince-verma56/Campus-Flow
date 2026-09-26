@@ -1,6 +1,6 @@
 package com.campusflow.controller;
 
-import com.campusflow.model.Student;
+import com.campusflow.entity.Student;
 import com.campusflow.service.StudentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
