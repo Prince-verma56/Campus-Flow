@@ -6,6 +6,7 @@ import com.campusflow.service.FacultyService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,28 +22,33 @@ public class FacultyController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('STUDENT', 'FACULTY', 'ADMIN')")
     public ResponseEntity<List<FacultyResponse>> getAllFaculty() {
         return ResponseEntity.ok(facultyService.getAllFaculty());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'FACULTY', 'ADMIN')")
     public ResponseEntity<FacultyResponse> getFacultyById(@PathVariable Long id) {
         return ResponseEntity.ok(facultyService.getFacultyById(id));
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FacultyResponse> createFaculty(@Valid @RequestBody FacultyRequest request) {
         FacultyResponse createdFaculty = facultyService.createFaculty(request);
         return new ResponseEntity<>(createdFaculty, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FacultyResponse> updateFaculty(@PathVariable Long id, @Valid @RequestBody FacultyRequest request) {
         FacultyResponse updatedFaculty = facultyService.updateFaculty(id, request);
         return ResponseEntity.ok(updatedFaculty);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteFaculty(@PathVariable Long id) {
         facultyService.deleteFaculty(id);
         return ResponseEntity.noContent().build();
