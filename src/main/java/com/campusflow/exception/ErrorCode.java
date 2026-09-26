@@ -1,0 +1,13 @@
+package com.campusflow.exception;
+
+public enum ErrorCode {
+    VALIDATION_ERROR,
+    RESOURCE_NOT_FOUND,
+    DUPLICATE_RESOURCE,
+    INVALID_REFERENCE,
+    BAD_REQUEST,
+    CONFLICT,
+    INTERNAL_SERVER_ERROR,
+    METHOD_NOT_ALLOWED,
+    UNSUPPORTED_MEDIA_TYPE
+}

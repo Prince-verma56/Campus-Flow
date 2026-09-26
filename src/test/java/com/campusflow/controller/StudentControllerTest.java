@@ -2,6 +2,8 @@ package com.campusflow.controller;
 
 import com.campusflow.dto.student.StudentRequest;
 import com.campusflow.dto.student.StudentResponse;
+import com.campusflow.exception.GlobalExceptionHandler;
+import com.campusflow.exception.ResourceNotFoundException;
 import com.campusflow.service.StudentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +31,9 @@ class StudentControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(studentController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(studentController)
+            .setControllerAdvice(new GlobalExceptionHandler())
+            .build();
     }
 
     @Test
@@ -45,14 +49,7 @@ class StudentControllerTest {
     @Test
     void getStudentById_ShouldReturn404_WhenStudentDoesNotExist() throws Exception {
         when(studentService.getStudentById(1L))
-                .thenThrow(new IllegalArgumentException("Student not found with id: 1"));
-
-        // GlobalExceptionHandler handles the exception when running the full app,
-        // but standalone setup might not have it attached. Let's just test that the service throws.
-        // Or we can add ControllerAdvice to MockMvc.
-        mockMvc = MockMvcBuilders.standaloneSetup(studentController)
-            .setControllerAdvice(new com.campusflow.exception.GlobalExceptionHandler())
-            .build();
+                .thenThrow(new ResourceNotFoundException("Student not found with id: 1"));
 
         mockMvc.perform(get("/api/v1/students/1"))
                 .andExpect(status().isNotFound())

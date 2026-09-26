@@ -4,6 +4,7 @@ import com.campusflow.dto.student.StudentRequest;
 import com.campusflow.dto.student.StudentResponse;
 import com.campusflow.entity.Department;
 import com.campusflow.entity.Student;
+import com.campusflow.exception.ResourceNotFoundException;
 import com.campusflow.repository.StudentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,7 +52,7 @@ class StudentServiceTest {
     void shouldThrowExceptionWhenStudentNotFound() {
         when(studentRepository.findById(99L)).thenReturn(Optional.empty());
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             studentService.getStudentById(99L);
         });
 

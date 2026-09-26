@@ -5,6 +5,8 @@ import com.campusflow.dto.course.CourseResponse;
 import com.campusflow.entity.Course;
 import com.campusflow.entity.Department;
 import com.campusflow.entity.Faculty;
+import com.campusflow.exception.InvalidReferenceException;
+import com.campusflow.exception.ResourceNotFoundException;
 import com.campusflow.mapper.CourseMapper;
 import com.campusflow.repository.CourseRepository;
 import org.springframework.stereotype.Service;
@@ -29,7 +31,7 @@ public class CourseService {
 
     public Course getCourseEntityById(Long id) {
         return courseRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
     }
 
     public List<CourseResponse> getAllCourses() {
@@ -44,8 +46,19 @@ public class CourseService {
 
     @Transactional
     public CourseResponse createCourse(CourseRequest request) {
-        Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
-        Faculty faculty = facultyService.getFacultyEntityById(request.getFacultyId());
+        Department dept;
+        Faculty faculty;
+        try {
+            dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
+        } catch (ResourceNotFoundException e) {
+            throw new InvalidReferenceException("Cannot create Course. " + e.getMessage());
+        }
+        
+        try {
+            faculty = facultyService.getFacultyEntityById(request.getFacultyId());
+        } catch (ResourceNotFoundException e) {
+            throw new InvalidReferenceException("Cannot create Course. " + e.getMessage());
+        }
         
         Course course = CourseMapper.toEntity(request, dept, faculty);
         course = courseRepository.save(course);
@@ -62,13 +75,21 @@ public class CourseService {
         existingCourse.setSemester(request.getSemester());
         
         if (request.getDepartmentId() != null) {
-            Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
-            existingCourse.setDepartment(dept);
+            try {
+                Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
+                existingCourse.setDepartment(dept);
+            } catch (ResourceNotFoundException e) {
+                throw new InvalidReferenceException("Cannot update Course. " + e.getMessage());
+            }
         }
         
         if (request.getFacultyId() != null) {
-            Faculty faculty = facultyService.getFacultyEntityById(request.getFacultyId());
-            existingCourse.setFaculty(faculty);
+            try {
+                Faculty faculty = facultyService.getFacultyEntityById(request.getFacultyId());
+                existingCourse.setFaculty(faculty);
+            } catch (ResourceNotFoundException e) {
+                throw new InvalidReferenceException("Cannot update Course. " + e.getMessage());
+            }
         }
 
         existingCourse = courseRepository.save(existingCourse);

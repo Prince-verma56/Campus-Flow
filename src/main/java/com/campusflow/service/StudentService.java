@@ -4,6 +4,8 @@ import com.campusflow.dto.student.StudentRequest;
 import com.campusflow.dto.student.StudentResponse;
 import com.campusflow.entity.Department;
 import com.campusflow.entity.Student;
+import com.campusflow.exception.InvalidReferenceException;
+import com.campusflow.exception.ResourceNotFoundException;
 import com.campusflow.mapper.StudentMapper;
 import com.campusflow.repository.StudentRepository;
 import org.springframework.stereotype.Service;
@@ -26,7 +28,7 @@ public class StudentService {
 
     public Student getStudentEntityById(Long id) {
         return studentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
     }
 
     public List<StudentResponse> getAllStudents() {
@@ -41,7 +43,13 @@ public class StudentService {
 
     @Transactional
     public StudentResponse createStudent(StudentRequest request) {
-        Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
+        Department dept;
+        try {
+            dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
+        } catch (ResourceNotFoundException e) {
+            throw new InvalidReferenceException("Cannot create Student. " + e.getMessage());
+        }
+
         Student student = StudentMapper.toEntity(request, dept);
         student = studentRepository.save(student);
         return StudentMapper.toResponse(student);
@@ -55,8 +63,12 @@ public class StudentService {
         existingStudent.setEmail(request.getEmail());
         
         if (request.getDepartmentId() != null) {
-            Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
-            existingStudent.setDepartment(dept);
+            try {
+                Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
+                existingStudent.setDepartment(dept);
+            } catch (ResourceNotFoundException e) {
+                throw new InvalidReferenceException("Cannot update Student. " + e.getMessage());
+            }
         }
 
         existingStudent = studentRepository.save(existingStudent);

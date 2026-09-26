@@ -3,6 +3,7 @@ package com.campusflow.service;
 import com.campusflow.dto.department.DepartmentRequest;
 import com.campusflow.dto.department.DepartmentResponse;
 import com.campusflow.entity.Department;
+import com.campusflow.exception.ResourceNotFoundException;
 import com.campusflow.mapper.DepartmentMapper;
 import com.campusflow.repository.DepartmentRepository;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class DepartmentService {
 
     public Department getDepartmentEntityById(Long id) {
         return departmentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Department not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + id));
     }
 
     public List<DepartmentResponse> getAllDepartments() {

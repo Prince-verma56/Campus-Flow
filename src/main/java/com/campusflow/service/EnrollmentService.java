@@ -5,6 +5,8 @@ import com.campusflow.dto.enrollment.EnrollmentResponse;
 import com.campusflow.entity.Course;
 import com.campusflow.entity.Enrollment;
 import com.campusflow.entity.Student;
+import com.campusflow.exception.InvalidReferenceException;
+import com.campusflow.exception.ResourceNotFoundException;
 import com.campusflow.mapper.EnrollmentMapper;
 import com.campusflow.repository.EnrollmentRepository;
 import org.springframework.stereotype.Service;
@@ -29,7 +31,7 @@ public class EnrollmentService {
 
     public Enrollment getEnrollmentEntityById(Long id) {
         return enrollmentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Enrollment not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + id));
     }
 
     public List<EnrollmentResponse> getAllEnrollments() {
@@ -44,8 +46,19 @@ public class EnrollmentService {
 
     @Transactional
     public EnrollmentResponse createEnrollment(EnrollmentRequest request) {
-        Student student = studentService.getStudentEntityById(request.getStudentId());
-        Course course = courseService.getCourseEntityById(request.getCourseId());
+        Student student;
+        Course course;
+        try {
+            student = studentService.getStudentEntityById(request.getStudentId());
+        } catch (ResourceNotFoundException e) {
+            throw new InvalidReferenceException("Cannot create Enrollment. " + e.getMessage());
+        }
+        
+        try {
+            course = courseService.getCourseEntityById(request.getCourseId());
+        } catch (ResourceNotFoundException e) {
+            throw new InvalidReferenceException("Cannot create Enrollment. " + e.getMessage());
+        }
         
         Enrollment enrollment = EnrollmentMapper.toEntity(request, student, course);
         enrollment = enrollmentRepository.save(enrollment);
@@ -59,13 +72,21 @@ public class EnrollmentService {
         existingEnrollment.setStatus(request.getStatus());
         
         if (request.getStudentId() != null) {
-            Student student = studentService.getStudentEntityById(request.getStudentId());
-            existingEnrollment.setStudent(student);
+            try {
+                Student student = studentService.getStudentEntityById(request.getStudentId());
+                existingEnrollment.setStudent(student);
+            } catch (ResourceNotFoundException e) {
+                throw new InvalidReferenceException("Cannot update Enrollment. " + e.getMessage());
+            }
         }
         
         if (request.getCourseId() != null) {
-            Course course = courseService.getCourseEntityById(request.getCourseId());
-            existingEnrollment.setCourse(course);
+            try {
+                Course course = courseService.getCourseEntityById(request.getCourseId());
+                existingEnrollment.setCourse(course);
+            } catch (ResourceNotFoundException e) {
+                throw new InvalidReferenceException("Cannot update Enrollment. " + e.getMessage());
+            }
         }
 
         existingEnrollment = enrollmentRepository.save(existingEnrollment);

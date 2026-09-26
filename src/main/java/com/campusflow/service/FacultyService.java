@@ -4,6 +4,8 @@ import com.campusflow.dto.faculty.FacultyRequest;
 import com.campusflow.dto.faculty.FacultyResponse;
 import com.campusflow.entity.Department;
 import com.campusflow.entity.Faculty;
+import com.campusflow.exception.InvalidReferenceException;
+import com.campusflow.exception.ResourceNotFoundException;
 import com.campusflow.mapper.FacultyMapper;
 import com.campusflow.repository.FacultyRepository;
 import org.springframework.stereotype.Service;
@@ -26,7 +28,7 @@ public class FacultyService {
 
     public Faculty getFacultyEntityById(Long id) {
         return facultyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Faculty not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Faculty not found with id: " + id));
     }
 
     public List<FacultyResponse> getAllFaculty() {
@@ -41,7 +43,13 @@ public class FacultyService {
 
     @Transactional
     public FacultyResponse createFaculty(FacultyRequest request) {
-        Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
+        Department dept;
+        try {
+            dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
+        } catch (ResourceNotFoundException e) {
+            throw new InvalidReferenceException("Cannot create Faculty. " + e.getMessage());
+        }
+        
         Faculty faculty = FacultyMapper.toEntity(request, dept);
         faculty = facultyRepository.save(faculty);
         return FacultyMapper.toResponse(faculty);
@@ -56,8 +64,12 @@ public class FacultyService {
         existingFaculty.setEmployeeNumber(request.getEmployeeNumber());
         
         if (request.getDepartmentId() != null) {
-            Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
-            existingFaculty.setDepartment(dept);
+            try {
+                Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
+                existingFaculty.setDepartment(dept);
+            } catch (ResourceNotFoundException e) {
+                throw new InvalidReferenceException("Cannot update Faculty. " + e.getMessage());
+            }
         }
 
         existingFaculty = facultyRepository.save(existingFaculty);
