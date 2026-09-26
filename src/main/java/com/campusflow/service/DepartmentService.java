@@ -6,11 +6,15 @@ import com.campusflow.entity.Department;
 import com.campusflow.exception.ResourceNotFoundException;
 import com.campusflow.mapper.DepartmentMapper;
 import com.campusflow.repository.DepartmentRepository;
+import com.campusflow.repository.specification.DepartmentSpecification;
+import com.campusflow.dto.common.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -27,10 +31,12 @@ public class DepartmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + id));
     }
 
-    public List<DepartmentResponse> getAllDepartments() {
-        return departmentRepository.findAll().stream()
-                .map(DepartmentMapper::toResponse)
-                .collect(Collectors.toList());
+    public PageResponse<DepartmentResponse> getAllDepartments(String search, Pageable pageable) {
+        Specification<Department> spec = DepartmentSpecification.getDepartmentsQuery(search);
+        Page<Department> pageResult = departmentRepository.findAll(spec, pageable);
+        
+        Page<DepartmentResponse> responsePage = pageResult.map(DepartmentMapper::toResponse);
+        return new PageResponse<>(responsePage);
     }
 
     public DepartmentResponse getDepartmentById(Long id) {

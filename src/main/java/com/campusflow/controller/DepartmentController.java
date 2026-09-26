@@ -23,8 +23,10 @@ public class DepartmentController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('STUDENT', 'FACULTY', 'ADMIN')")
-    public ResponseEntity<List<DepartmentResponse>> getAllDepartments() {
-        return ResponseEntity.ok(departmentService.getAllDepartments());
+    public ResponseEntity<com.campusflow.dto.common.PageResponse<DepartmentResponse>> getAllDepartments(
+            @RequestParam(required = false) String search,
+            org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(departmentService.getAllDepartments(search, pageable));
     }
 
     @GetMapping("/{id}")

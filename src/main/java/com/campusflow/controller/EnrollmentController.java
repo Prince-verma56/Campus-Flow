@@ -23,8 +23,12 @@ public class EnrollmentController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('FACULTY', 'ADMIN')")
-    public ResponseEntity<List<EnrollmentResponse>> getAllEnrollments() {
-        return ResponseEntity.ok(enrollmentService.getAllEnrollments());
+    public ResponseEntity<com.campusflow.dto.common.PageResponse<EnrollmentResponse>> getAllEnrollments(
+            @RequestParam(required = false) Long studentId,
+            @RequestParam(required = false) Long courseId,
+            @RequestParam(required = false) String status,
+            org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(enrollmentService.getAllEnrollments(studentId, courseId, status, pageable));
     }
 
     @GetMapping("/{id}")

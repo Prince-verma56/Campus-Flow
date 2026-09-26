@@ -8,11 +8,15 @@ import com.campusflow.exception.InvalidReferenceException;
 import com.campusflow.exception.ResourceNotFoundException;
 import com.campusflow.mapper.StudentMapper;
 import com.campusflow.repository.StudentRepository;
+import com.campusflow.repository.specification.StudentSpecification;
+import com.campusflow.dto.common.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,10 +35,12 @@ public class StudentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
     }
 
-    public List<StudentResponse> getAllStudents() {
-        return studentRepository.findAll().stream()
-                .map(StudentMapper::toResponse)
-                .collect(Collectors.toList());
+    public PageResponse<StudentResponse> getAllStudents(String search, Long departmentId, Pageable pageable) {
+        Specification<Student> spec = StudentSpecification.getStudentsQuery(search, departmentId);
+        Page<Student> pageResult = studentRepository.findAll(spec, pageable);
+        
+        Page<StudentResponse> responsePage = pageResult.map(StudentMapper::toResponse);
+        return new PageResponse<>(responsePage);
     }
 
     public StudentResponse getStudentById(Long id) {

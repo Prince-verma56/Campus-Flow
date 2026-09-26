@@ -8,11 +8,15 @@ import com.campusflow.exception.InvalidReferenceException;
 import com.campusflow.exception.ResourceNotFoundException;
 import com.campusflow.mapper.FacultyMapper;
 import com.campusflow.repository.FacultyRepository;
+import com.campusflow.repository.specification.FacultySpecification;
+import com.campusflow.dto.common.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,10 +35,12 @@ public class FacultyService {
                 .orElseThrow(() -> new ResourceNotFoundException("Faculty not found with id: " + id));
     }
 
-    public List<FacultyResponse> getAllFaculty() {
-        return facultyRepository.findAll().stream()
-                .map(FacultyMapper::toResponse)
-                .collect(Collectors.toList());
+    public PageResponse<FacultyResponse> getAllFaculty(String search, Long departmentId, Pageable pageable) {
+        Specification<Faculty> spec = FacultySpecification.getFacultyQuery(search, departmentId);
+        Page<Faculty> pageResult = facultyRepository.findAll(spec, pageable);
+        
+        Page<FacultyResponse> responsePage = pageResult.map(FacultyMapper::toResponse);
+        return new PageResponse<>(responsePage);
     }
 
     public FacultyResponse getFacultyById(Long id) {

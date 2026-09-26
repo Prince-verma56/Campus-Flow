@@ -9,11 +9,15 @@ import com.campusflow.exception.InvalidReferenceException;
 import com.campusflow.exception.ResourceNotFoundException;
 import com.campusflow.mapper.CourseMapper;
 import com.campusflow.repository.CourseRepository;
+import com.campusflow.repository.specification.CourseSpecification;
+import com.campusflow.dto.common.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -34,10 +38,12 @@ public class CourseService {
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
     }
 
-    public List<CourseResponse> getAllCourses() {
-        return courseRepository.findAll().stream()
-                .map(CourseMapper::toResponse)
-                .collect(Collectors.toList());
+    public PageResponse<CourseResponse> getAllCourses(String search, Long departmentId, Long facultyId, Integer semester, Pageable pageable) {
+        Specification<Course> spec = CourseSpecification.getCourseQuery(search, departmentId, facultyId, semester);
+        Page<Course> pageResult = courseRepository.findAll(spec, pageable);
+        
+        Page<CourseResponse> responsePage = pageResult.map(CourseMapper::toResponse);
+        return new PageResponse<>(responsePage);
     }
 
     public CourseResponse getCourseById(Long id) {

@@ -9,11 +9,15 @@ import com.campusflow.exception.InvalidReferenceException;
 import com.campusflow.exception.ResourceNotFoundException;
 import com.campusflow.mapper.EnrollmentMapper;
 import com.campusflow.repository.EnrollmentRepository;
+import com.campusflow.repository.specification.EnrollmentSpecification;
+import com.campusflow.dto.common.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -34,10 +38,12 @@ public class EnrollmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + id));
     }
 
-    public List<EnrollmentResponse> getAllEnrollments() {
-        return enrollmentRepository.findAll().stream()
-                .map(EnrollmentMapper::toResponse)
-                .collect(Collectors.toList());
+    public PageResponse<EnrollmentResponse> getAllEnrollments(Long studentId, Long courseId, String status, Pageable pageable) {
+        Specification<Enrollment> spec = EnrollmentSpecification.getEnrollmentQuery(studentId, courseId, status);
+        Page<Enrollment> pageResult = enrollmentRepository.findAll(spec, pageable);
+        
+        Page<EnrollmentResponse> responsePage = pageResult.map(EnrollmentMapper::toResponse);
+        return new PageResponse<>(responsePage);
     }
 
     public EnrollmentResponse getEnrollmentById(Long id) {
