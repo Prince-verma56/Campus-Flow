@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'CampusFlow - ' + ${title}">CampusFlow</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="bg-slate-50/50 min-h-screen flex flex-col antialiased text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
+    
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <div class="flex flex-1 overflow-hidden max-w-screen-2xl mx-auto w-full">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="flex-1 overflow-y-auto p-8 lg:p-12">
+            <!-- Using the updated header fragment with subtitle -->
+            <div th:replace="~{fragments/page-header :: header(title=${title}, subtitle='Overview of your academic progress for the current semester.')}"></div>
+            
+            <!-- Statistics Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div th:replace="~{fragments/components :: stat-card(label='Current GPA', value='3.84', trend='+0.05')}"></div>
+                <div th:replace="~{fragments/components :: stat-card(label='Attendance', value='96%', trend='Stable')}"></div>
+                <div th:replace="~{fragments/components :: stat-card(label='Assignments Due', value='4', trend='This week')}"></div>
+            </div>
+            
+            <!-- Main Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="lg:col-span-2 flex flex-col gap-8">
+                    <!-- Schedule Card -->
+                    <div th:replace="~{fragments/components :: card(title='Today\'s Schedule')}">
+                        <div class="flex flex-col gap-4">
+                            <!-- Injected content into the card fragment -->
+                            <div class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100/50">
+                                <div class="w-12 h-12 rounded-lg bg-indigo-100 flex flex-col items-center justify-center text-indigo-700">
+                                    <span class="text-[10px] font-bold uppercase leading-none">AM</span>
+                                    <span class="text-lg font-extrabold leading-none mt-0.5">10</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">CS301: Data Structures</h4>
+                                    <p class="text-sm text-slate-500 mt-0.5 flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                        Room 402, Science Wing
+                                    </p>
+                                </div>
+                                <div class="ml-auto">
+                                    <div th:replace="~{fragments/components :: badge(text='In 45 mins', type='warning')}"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-4 p-4 rounded-xl border border-slate-100/50 hover:bg-slate-50 transition-colors cursor-pointer">
+                                <div class="w-12 h-12 rounded-lg bg-slate-100 flex flex-col items-center justify-center text-slate-500">
+                                    <span class="text-[10px] font-bold uppercase leading-none">PM</span>
+                                    <span class="text-lg font-extrabold leading-none mt-0.5">02</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">ENG205: Modern Literature</h4>
+                                    <p class="text-sm text-slate-500 mt-0.5 flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                        Virtual Lecture
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col gap-8">
+                    <!-- Recent Activity Card -->
+                    <div th:replace="~{fragments/components :: card(title='Recent Activity')}">
+                        <div class="relative pl-4 border-l-2 border-slate-100 flex flex-col gap-6 py-2">
+                            <div class="relative">
+                                <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-white"></div>
+                                <p class="text-sm font-semibold text-slate-900">Grade Posted</p>
+                                <p class="text-sm text-slate-500 mt-0.5">You received an <span class="font-bold text-emerald-600">A</span> in CS201 Midterm.</p>
+                                <p class="text-xs text-slate-400 mt-1.5 font-medium">2 hours ago</p>
+                            </div>
+                            <div class="relative">
+                                <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-indigo-500 ring-4 ring-white"></div>
+                                <p class="text-sm font-semibold text-slate-900">Assignment Uploaded</p>
+                                <p class="text-sm text-slate-500 mt-0.5">"Algorithm Analysis" was submitted successfully.</p>
+                                <p class="text-xs text-slate-400 mt-1.5 font-medium">Yesterday at 4:30 PM</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </main>
+    </div>
+    
+</body>
+</html>

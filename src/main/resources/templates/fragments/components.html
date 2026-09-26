@@ -1,0 +1,31 @@
+<!-- Reusable Thymeleaf UI Components -->
+
+<!-- Stat Card Component -->
+<th:block th:fragment="stat-card(label, value, trend)">
+    <div class="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.03)] hover:shadow-[0_8px_30px_-4px_rgba(6,81,237,0.06)] transition-all duration-300">
+        <p class="text-[13px] font-semibold text-slate-500 uppercase tracking-widest mb-2" th:text="${label}">Label</p>
+        <div class="flex items-baseline gap-3">
+            <p class="text-4xl font-extrabold text-slate-900 tracking-tight" th:text="${value}">0</p>
+            <span class="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-100/50 px-2 py-1 rounded-md" th:text="${trend}">+0%</span>
+        </div>
+    </div>
+</th:block>
+
+<!-- Basic Card Component -->
+<th:block th:fragment="card(title)">
+    <div class="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.03)] h-full">
+        <h3 class="text-lg font-bold text-slate-900 mb-4 tracking-tight" th:text="${title}">Card Title</h3>
+        <!-- The tag below allows us to inject child content into the fragment when we call it! -->
+        <div class="text-slate-600 leading-relaxed text-sm">
+            <!-- This is where the injected content will go -->
+        </div>
+    </div>
+</th:block>
+
+<!-- Badge Component -->
+<th:block th:fragment="badge(text, type)">
+    <span th:classappend="${type == 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50' : (type == 'warning' ? 'bg-amber-50 text-amber-700 border-amber-200/50' : 'bg-slate-50 text-slate-700 border-slate-200/50')}" 
+          class="px-2.5 py-1 text-xs font-bold rounded-md border shadow-sm">
+        <span th:text="${text}">Badge</span>
+    </span>
+</th:block>

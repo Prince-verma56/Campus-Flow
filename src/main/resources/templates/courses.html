@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'CampusFlow - ' + ${title}">CampusFlow</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col antialiased text-gray-900">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    <div class="flex flex-1 overflow-hidden">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        <main class="flex-1 overflow-y-auto p-8 bg-white/50">
+            <div th:replace="~{fragments/page-header :: header(title=${title})}"></div>
+            <div class="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
+                <p class="text-gray-600 text-lg">
+                    This is the premium presentation shell for the <span th:text="${title}" class="font-semibold text-indigo-600"></span> page.
+                </p>
+                <div class="mt-6 h-64 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center bg-gray-50">
+                    <span class="text-gray-400 font-medium">Content Area Placeholder</span>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
