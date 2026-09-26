@@ -45,3 +45,7 @@ build/
 # - src/main/resources/static/css/app.css (Required for Spring Boot to run with styling without a Node environment)
 # - package-lock.json (Required for deterministic npm installs)
 # - mvnw and .mvn/ (Required for local reproducible Maven builds)
+
+# Personal AI & Audit files
+audits/
+Neuron of Project/

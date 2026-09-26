@@ -28,8 +28,6 @@ CampusFlow follows a standard Spring Boot layered architecture (Controller → S
 
 ## Project Structure
 - `src/`: Contains the main Java source code, static assets, and Thymeleaf HTML templates.
-- `brain/`: Contains permanent project knowledge, design specifications, and architecture rules.
-- `audits/`: Contains historical project progress, learning records, and phase audits.
 
 ## Development Setup
 
@@ -82,4 +80,4 @@ Navigate to `http://localhost:8080/`
 We use a standard Git workflow where `main` acts as the primary integration branch. Feature development should happen on branches and merge into `main` after review.
 
 ## Learning Approach
-CampusFlow is an educational, learning-first project. It is being developed phase-by-phase with structured microtasks. After each microtask, an audit is generated to record progress and learning outcomes. It is not currently production-ready.
+CampusFlow is an educational, learning-first project. It is being developed phase-by-phase with structured microtasks. It is not currently production-ready.

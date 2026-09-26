@@ -1,4 +1,4 @@
-<header th:fragment="header(title, subtitle)" class="mb-8">
+<header th:fragment="header" class="mb-8">
     <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight" th:text="${title}">Page Title</h1>
     <p class="text-slate-500 mt-1 font-medium" th:if="${subtitle != null}" th:text="${subtitle}">Page subtitle goes here</p>
 </header>
