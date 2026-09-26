@@ -6,21 +6,22 @@
     <title th:text="'CampusFlow - ' + ${title}">CampusFlow</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col antialiased text-gray-900">
+<body class="bg-campus-bg min-h-screen flex flex-col antialiased text-ink-900">
     <div th:replace="~{fragments/navbar :: navbar}"></div>
     <div class="flex flex-1 overflow-hidden">
         <div th:replace="~{fragments/sidebar :: sidebar}"></div>
-        <main class="flex-1 overflow-y-auto p-8 bg-white/50">
+        <main class="flex-1 overflow-y-auto p-8 ">
             <div th:replace="~{fragments/page-header :: header(title=${title})}"></div>
-            <div class="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
-                <p class="text-gray-600 text-lg">
-                    This is the premium presentation shell for the <span th:text="${title}" class="font-semibold text-indigo-600"></span> page.
+            <div class="bg-campus-surface rounded-3xl p-8 shadow-neo-raised flex flex-col h-full">
+                <p class="text-ink-500 font-medium text-lg">
+                    This is the premium presentation shell for the <span th:text="${title}" class="font-semibold text-campus-accent font-extrabold"></span> page.
                 </p>
-                <div class="mt-6 h-64 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center bg-gray-50">
-                    <span class="text-gray-400 font-medium">Content Area Placeholder</span>
+                <div class="mt-8 flex-1 rounded-2xl flex items-center justify-center bg-campus-surface shadow-neo-inset border-2 border-white/20 min-h-[300px]">
+                    <span class="text-ink-500 font-bold uppercase tracking-widest opacity-60">Content Area Placeholder</span>
                 </div>
             </div>
         </main>
     </div>
 </body>
 </html>
+
