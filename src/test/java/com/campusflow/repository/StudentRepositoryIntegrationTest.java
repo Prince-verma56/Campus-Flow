@@ -1,6 +1,8 @@
 package com.campusflow.repository;
 
+import com.campusflow.entity.Department;
 import com.campusflow.entity.Student;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,19 +21,25 @@ class StudentRepositoryIntegrationTest {
     @Autowired
     private StudentRepository studentRepository;
 
+    @Autowired
+    private DepartmentRepository departmentRepository;
+
+    private Department department;
+
+    @BeforeEach
+    void setUp() {
+        department = new Department(null, "TEST", "Test Dept");
+        department = departmentRepository.save(department);
+    }
+
     @Test
     void shouldSaveAndRetrieveStudent() {
-        // Arrange
-        Student student = new Student(null, "Integration Test Student", "integration@example.com");
-
-        // Act
+        Student student = new Student(null, "Integration Test Student", "integration@example.com", department);
         Student savedStudent = studentRepository.save(student);
 
-        // Assert
         assertThat(savedStudent.getId()).isNotNull();
         assertThat(savedStudent.getName()).isEqualTo("Integration Test Student");
 
-        // Verify retrieval
         Optional<Student> retrievedStudent = studentRepository.findById(savedStudent.getId());
         assertThat(retrievedStudent).isPresent();
         assertThat(retrievedStudent.get().getEmail()).isEqualTo("integration@example.com");
@@ -39,15 +47,12 @@ class StudentRepositoryIntegrationTest {
 
     @Test
     void shouldUpdateStudent() {
-        // Arrange
-        Student student = new Student(null, "Update Student", "update@example.com");
+        Student student = new Student(null, "Update Student", "update@example.com", department);
         Student savedStudent = studentRepository.save(student);
 
-        // Act
         savedStudent.setName("Updated Name");
         Student updatedStudent = studentRepository.save(savedStudent);
 
-        // Assert
         assertThat(updatedStudent.getName()).isEqualTo("Updated Name");
         
         Optional<Student> retrievedStudent = studentRepository.findById(savedStudent.getId());
@@ -57,15 +62,12 @@ class StudentRepositoryIntegrationTest {
 
     @Test
     void shouldDeleteStudent() {
-        // Arrange
-        Student student = new Student(null, "Delete Student", "delete@example.com");
+        Student student = new Student(null, "Delete Student", "delete@example.com", department);
         Student savedStudent = studentRepository.save(student);
         Long id = savedStudent.getId();
 
-        // Act
         studentRepository.deleteById(id);
 
-        // Assert
         Optional<Student> retrievedStudent = studentRepository.findById(id);
         assertThat(retrievedStudent).isEmpty();
     }

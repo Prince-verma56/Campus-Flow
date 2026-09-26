@@ -1,10 +1,7 @@
 package com.campusflow.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "students")
@@ -13,18 +10,28 @@ public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, length = 100)
     private String name;
+
+    @Column(nullable = false, unique = true, length = 100)
     private String email;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "department_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Department department;
 
     // Default constructor
     public Student() {
     }
 
     // Constructor with fields
-    public Student(Long id, String name, String email) {
+    public Student(Long id, String name, String email, Department department) {
         this.id = id;
         this.name = name;
         this.email = email;
+        this.department = department;
     }
 
     // Getters and Setters
@@ -50,5 +57,13 @@ public class Student {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
     }
 }

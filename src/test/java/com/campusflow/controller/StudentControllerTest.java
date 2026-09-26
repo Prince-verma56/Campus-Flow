@@ -34,7 +34,8 @@ class StudentControllerTest {
 
     @Test
     void getStudentById_ShouldReturn200_WhenStudentExists() throws Exception {
-        Student mockStudent = new Student(1L, "Test Student", "test@example.com");
+        com.campusflow.entity.Department dept = new com.campusflow.entity.Department(1L, "CSE", "Computer Science");
+        Student mockStudent = new Student(1L, "Test Student", "test@example.com", dept);
         when(studentService.getStudentById(1L)).thenReturn(mockStudent);
 
         mockMvc.perform(get("/api/v1/students/1"))
