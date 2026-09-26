@@ -1,12 +1,16 @@
 package com.campusflow.service;
 
+import com.campusflow.dto.student.StudentRequest;
+import com.campusflow.dto.student.StudentResponse;
 import com.campusflow.entity.Department;
 import com.campusflow.entity.Student;
+import com.campusflow.mapper.StudentMapper;
 import com.campusflow.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,43 +24,48 @@ public class StudentService {
         this.departmentService = departmentService;
     }
 
-    public List<Student> getAllStudents() {
-        return studentRepository.findAll();
-    }
-
-    public Student getStudentById(Long id) {
+    public Student getStudentEntityById(Long id) {
         return studentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found with id: " + id));
     }
 
-    @Transactional
-    public Student createStudent(Student student) {
-        if (student.getDepartment() == null || student.getDepartment().getId() == null) {
-            throw new IllegalArgumentException("Department ID is required to create a student");
-        }
-        Department dept = departmentService.getDepartmentById(student.getDepartment().getId());
-        student.setDepartment(dept);
-        return studentRepository.save(student);
+    public List<StudentResponse> getAllStudents() {
+        return studentRepository.findAll().stream()
+                .map(StudentMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public StudentResponse getStudentById(Long id) {
+        return StudentMapper.toResponse(getStudentEntityById(id));
     }
 
     @Transactional
-    public Student updateStudent(Long id, Student updatedStudent) {
-        Student existingStudent = getStudentById(id);
+    public StudentResponse createStudent(StudentRequest request) {
+        Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
+        Student student = StudentMapper.toEntity(request, dept);
+        student = studentRepository.save(student);
+        return StudentMapper.toResponse(student);
+    }
+
+    @Transactional
+    public StudentResponse updateStudent(Long id, StudentRequest request) {
+        Student existingStudent = getStudentEntityById(id);
         
-        existingStudent.setName(updatedStudent.getName());
-        existingStudent.setEmail(updatedStudent.getEmail());
+        existingStudent.setName(request.getName());
+        existingStudent.setEmail(request.getEmail());
         
-        if (updatedStudent.getDepartment() != null && updatedStudent.getDepartment().getId() != null) {
-            Department dept = departmentService.getDepartmentById(updatedStudent.getDepartment().getId());
+        if (request.getDepartmentId() != null) {
+            Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
             existingStudent.setDepartment(dept);
         }
 
-        return studentRepository.save(existingStudent);
+        existingStudent = studentRepository.save(existingStudent);
+        return StudentMapper.toResponse(existingStudent);
     }
 
     @Transactional
     public void deleteStudent(Long id) {
-        getStudentById(id);
+        getStudentEntityById(id);
         studentRepository.deleteById(id);
     }
 }

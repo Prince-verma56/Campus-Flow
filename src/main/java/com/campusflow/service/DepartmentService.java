@@ -1,11 +1,15 @@
 package com.campusflow.service;
 
+import com.campusflow.dto.department.DepartmentRequest;
+import com.campusflow.dto.department.DepartmentResponse;
 import com.campusflow.entity.Department;
+import com.campusflow.mapper.DepartmentMapper;
 import com.campusflow.repository.DepartmentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -17,33 +21,40 @@ public class DepartmentService {
         this.departmentRepository = departmentRepository;
     }
 
-    public List<Department> getAllDepartments() {
-        return departmentRepository.findAll();
-    }
-
-    public Department getDepartmentById(Long id) {
+    public Department getDepartmentEntityById(Long id) {
         return departmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Department not found with id: " + id));
     }
 
-    @Transactional
-    public Department createDepartment(Department department) {
-        return departmentRepository.save(department);
+    public List<DepartmentResponse> getAllDepartments() {
+        return departmentRepository.findAll().stream()
+                .map(DepartmentMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public DepartmentResponse getDepartmentById(Long id) {
+        return DepartmentMapper.toResponse(getDepartmentEntityById(id));
     }
 
     @Transactional
-    public Department updateDepartment(Long id, Department departmentDetails) {
-        Department department = getDepartmentById(id);
-        department.setCode(departmentDetails.getCode());
-        department.setName(departmentDetails.getName());
-        return departmentRepository.save(department);
+    public DepartmentResponse createDepartment(DepartmentRequest request) {
+        Department department = DepartmentMapper.toEntity(request);
+        department = departmentRepository.save(department);
+        return DepartmentMapper.toResponse(department);
+    }
+
+    @Transactional
+    public DepartmentResponse updateDepartment(Long id, DepartmentRequest request) {
+        Department department = getDepartmentEntityById(id);
+        department.setCode(request.getCode());
+        department.setName(request.getName());
+        department = departmentRepository.save(department);
+        return DepartmentMapper.toResponse(department);
     }
 
     @Transactional
     public void deleteDepartment(Long id) {
-        if (!departmentRepository.existsById(id)) {
-            throw new IllegalArgumentException("Department not found with id: " + id);
-        }
+        getDepartmentEntityById(id);
         departmentRepository.deleteById(id);
     }
 }

@@ -1,13 +1,17 @@
 package com.campusflow.service;
 
+import com.campusflow.dto.course.CourseRequest;
+import com.campusflow.dto.course.CourseResponse;
 import com.campusflow.entity.Course;
 import com.campusflow.entity.Department;
 import com.campusflow.entity.Faculty;
+import com.campusflow.mapper.CourseMapper;
 import com.campusflow.repository.CourseRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,55 +27,57 @@ public class CourseService {
         this.facultyService = facultyService;
     }
 
-    public List<Course> getAllCourses() {
-        return courseRepository.findAll();
-    }
-
-    public Course getCourseById(Long id) {
+    public Course getCourseEntityById(Long id) {
         return courseRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found with id: " + id));
     }
 
-    @Transactional
-    public Course createCourse(Course course) {
-        if (course.getDepartment() == null || course.getDepartment().getId() == null) {
-            throw new IllegalArgumentException("Department ID is required to create a course");
-        }
-        if (course.getFaculty() == null || course.getFaculty().getId() == null) {
-            throw new IllegalArgumentException("Faculty ID is required to create a course");
-        }
-        Department dept = departmentService.getDepartmentById(course.getDepartment().getId());
-        Faculty fac = facultyService.getFacultyById(course.getFaculty().getId());
-        
-        course.setDepartment(dept);
-        course.setFaculty(fac);
-        
-        return courseRepository.save(course);
+    public List<CourseResponse> getAllCourses() {
+        return courseRepository.findAll().stream()
+                .map(CourseMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public CourseResponse getCourseById(Long id) {
+        return CourseMapper.toResponse(getCourseEntityById(id));
     }
 
     @Transactional
-    public Course updateCourse(Long id, Course updatedCourse) {
-        Course existingCourse = getCourseById(id);
-        existingCourse.setCode(updatedCourse.getCode());
-        existingCourse.setName(updatedCourse.getName());
-        existingCourse.setCredits(updatedCourse.getCredits());
-        existingCourse.setSemester(updatedCourse.getSemester());
+    public CourseResponse createCourse(CourseRequest request) {
+        Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
+        Faculty faculty = facultyService.getFacultyEntityById(request.getFacultyId());
+        
+        Course course = CourseMapper.toEntity(request, dept, faculty);
+        course = courseRepository.save(course);
+        return CourseMapper.toResponse(course);
+    }
 
-        if (updatedCourse.getDepartment() != null && updatedCourse.getDepartment().getId() != null) {
-            Department dept = departmentService.getDepartmentById(updatedCourse.getDepartment().getId());
+    @Transactional
+    public CourseResponse updateCourse(Long id, CourseRequest request) {
+        Course existingCourse = getCourseEntityById(id);
+        
+        existingCourse.setCode(request.getCode());
+        existingCourse.setName(request.getName());
+        existingCourse.setCredits(request.getCredits());
+        existingCourse.setSemester(request.getSemester());
+        
+        if (request.getDepartmentId() != null) {
+            Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
             existingCourse.setDepartment(dept);
         }
-        if (updatedCourse.getFaculty() != null && updatedCourse.getFaculty().getId() != null) {
-            Faculty fac = facultyService.getFacultyById(updatedCourse.getFaculty().getId());
-            existingCourse.setFaculty(fac);
+        
+        if (request.getFacultyId() != null) {
+            Faculty faculty = facultyService.getFacultyEntityById(request.getFacultyId());
+            existingCourse.setFaculty(faculty);
         }
 
-        return courseRepository.save(existingCourse);
+        existingCourse = courseRepository.save(existingCourse);
+        return CourseMapper.toResponse(existingCourse);
     }
 
     @Transactional
     public void deleteCourse(Long id) {
-        getCourseById(id);
+        getCourseEntityById(id);
         courseRepository.deleteById(id);
     }
 }

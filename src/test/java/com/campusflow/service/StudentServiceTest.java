@@ -1,5 +1,7 @@
 package com.campusflow.service;
 
+import com.campusflow.dto.student.StudentRequest;
+import com.campusflow.dto.student.StudentResponse;
 import com.campusflow.entity.Department;
 import com.campusflow.entity.Student;
 import com.campusflow.repository.StudentRepository;
@@ -14,7 +16,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StudentServiceTest {
@@ -31,15 +33,18 @@ class StudentServiceTest {
     @Test
     void shouldCreateStudent() {
         Department dept = new Department(1L, "CSE", "Computer Science");
-        Student student = new Student(null, "Alice", "alice@example.com", dept);
+        StudentRequest request = new StudentRequest();
+        request.setName("Alice");
+        request.setEmail("alice@example.com");
+        request.setDepartmentId(1L);
         
-        when(departmentService.getDepartmentById(1L)).thenReturn(dept);
+        when(departmentService.getDepartmentEntityById(1L)).thenReturn(dept);
         when(studentRepository.save(any(Student.class))).thenReturn(new Student(1L, "Alice", "alice@example.com", dept));
 
-        Student saved = studentService.createStudent(student);
+        StudentResponse response = studentService.createStudent(request);
 
-        assertThat(saved.getId()).isEqualTo(1L);
-        assertThat(saved.getName()).isEqualTo("Alice");
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getName()).isEqualTo("Alice");
     }
 
     @Test

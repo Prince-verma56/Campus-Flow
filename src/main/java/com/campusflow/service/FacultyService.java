@@ -1,12 +1,16 @@
 package com.campusflow.service;
 
+import com.campusflow.dto.faculty.FacultyRequest;
+import com.campusflow.dto.faculty.FacultyResponse;
 import com.campusflow.entity.Department;
 import com.campusflow.entity.Faculty;
+import com.campusflow.mapper.FacultyMapper;
 import com.campusflow.repository.FacultyRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,43 +24,49 @@ public class FacultyService {
         this.departmentService = departmentService;
     }
 
-    public List<Faculty> getAllFaculty() {
-        return facultyRepository.findAll();
-    }
-
-    public Faculty getFacultyById(Long id) {
+    public Faculty getFacultyEntityById(Long id) {
         return facultyRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Faculty not found with id: " + id));
     }
 
-    @Transactional
-    public Faculty createFaculty(Faculty faculty) {
-        if (faculty.getDepartment() == null || faculty.getDepartment().getId() == null) {
-            throw new IllegalArgumentException("Department ID is required to create a faculty");
-        }
-        Department dept = departmentService.getDepartmentById(faculty.getDepartment().getId());
-        faculty.setDepartment(dept);
-        return facultyRepository.save(faculty);
+    public List<FacultyResponse> getAllFaculty() {
+        return facultyRepository.findAll().stream()
+                .map(FacultyMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public FacultyResponse getFacultyById(Long id) {
+        return FacultyMapper.toResponse(getFacultyEntityById(id));
     }
 
     @Transactional
-    public Faculty updateFaculty(Long id, Faculty updatedFaculty) {
-        Faculty existingFaculty = getFacultyById(id);
-        existingFaculty.setName(updatedFaculty.getName());
-        existingFaculty.setEmail(updatedFaculty.getEmail());
-        existingFaculty.setEmployeeNumber(updatedFaculty.getEmployeeNumber());
+    public FacultyResponse createFaculty(FacultyRequest request) {
+        Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
+        Faculty faculty = FacultyMapper.toEntity(request, dept);
+        faculty = facultyRepository.save(faculty);
+        return FacultyMapper.toResponse(faculty);
+    }
 
-        if (updatedFaculty.getDepartment() != null && updatedFaculty.getDepartment().getId() != null) {
-            Department dept = departmentService.getDepartmentById(updatedFaculty.getDepartment().getId());
+    @Transactional
+    public FacultyResponse updateFaculty(Long id, FacultyRequest request) {
+        Faculty existingFaculty = getFacultyEntityById(id);
+        
+        existingFaculty.setName(request.getName());
+        existingFaculty.setEmail(request.getEmail());
+        existingFaculty.setEmployeeNumber(request.getEmployeeNumber());
+        
+        if (request.getDepartmentId() != null) {
+            Department dept = departmentService.getDepartmentEntityById(request.getDepartmentId());
             existingFaculty.setDepartment(dept);
         }
 
-        return facultyRepository.save(existingFaculty);
+        existingFaculty = facultyRepository.save(existingFaculty);
+        return FacultyMapper.toResponse(existingFaculty);
     }
 
     @Transactional
     public void deleteFaculty(Long id) {
-        getFacultyById(id);
+        getFacultyEntityById(id);
         facultyRepository.deleteById(id);
     }
 }

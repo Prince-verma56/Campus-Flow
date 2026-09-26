@@ -1,6 +1,7 @@
 package com.campusflow.controller;
 
-import com.campusflow.entity.Student;
+import com.campusflow.dto.student.StudentRequest;
+import com.campusflow.dto.student.StudentResponse;
 import com.campusflow.service.StudentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,15 +29,13 @@ class StudentControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Build MockMvc directly without Spring Boot Test Context to bypass autoconfiguration issues
         mockMvc = MockMvcBuilders.standaloneSetup(studentController).build();
     }
 
     @Test
     void getStudentById_ShouldReturn200_WhenStudentExists() throws Exception {
-        com.campusflow.entity.Department dept = new com.campusflow.entity.Department(1L, "CSE", "Computer Science");
-        Student mockStudent = new Student(1L, "Test Student", "test@example.com", dept);
-        when(studentService.getStudentById(1L)).thenReturn(mockStudent);
+        StudentResponse response = new StudentResponse(1L, "Test Student", "test@example.com", 1L);
+        when(studentService.getStudentById(1L)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/students/1"))
                 .andExpect(status().isOk())
@@ -48,8 +47,15 @@ class StudentControllerTest {
         when(studentService.getStudentById(1L))
                 .thenThrow(new IllegalArgumentException("Student not found with id: 1"));
 
+        // GlobalExceptionHandler handles the exception when running the full app,
+        // but standalone setup might not have it attached. Let's just test that the service throws.
+        // Or we can add ControllerAdvice to MockMvc.
+        mockMvc = MockMvcBuilders.standaloneSetup(studentController)
+            .setControllerAdvice(new com.campusflow.exception.GlobalExceptionHandler())
+            .build();
+
         mockMvc.perform(get("/api/v1/students/1"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Student not found with id: 1"));
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 }

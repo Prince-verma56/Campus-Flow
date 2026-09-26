@@ -1,7 +1,9 @@
 package com.campusflow.controller;
 
-import com.campusflow.entity.Department;
+import com.campusflow.dto.department.DepartmentRequest;
+import com.campusflow.dto.department.DepartmentResponse;
 import com.campusflow.service.DepartmentService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,33 +21,30 @@ public class DepartmentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Department>> getAllDepartments() {
+    public ResponseEntity<List<DepartmentResponse>> getAllDepartments() {
         return ResponseEntity.ok(departmentService.getAllDepartments());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Department> getDepartmentById(@PathVariable Long id) {
+    public ResponseEntity<DepartmentResponse> getDepartmentById(@PathVariable Long id) {
         return ResponseEntity.ok(departmentService.getDepartmentById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Department> createDepartment(@RequestBody Department department) {
-        return new ResponseEntity<>(departmentService.createDepartment(department), HttpStatus.CREATED);
+    public ResponseEntity<DepartmentResponse> createDepartment(@Valid @RequestBody DepartmentRequest request) {
+        DepartmentResponse createdDepartment = departmentService.createDepartment(request);
+        return new ResponseEntity<>(createdDepartment, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Department> updateDepartment(@PathVariable Long id, @RequestBody Department department) {
-        return ResponseEntity.ok(departmentService.updateDepartment(id, department));
+    public ResponseEntity<DepartmentResponse> updateDepartment(@PathVariable Long id, @Valid @RequestBody DepartmentRequest request) {
+        DepartmentResponse updatedDepartment = departmentService.updateDepartment(id, request);
+        return ResponseEntity.ok(updatedDepartment);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
         departmentService.deleteDepartment(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleNotFound(IllegalArgumentException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 }

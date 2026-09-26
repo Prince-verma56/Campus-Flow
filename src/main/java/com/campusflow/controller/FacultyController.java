@@ -1,7 +1,9 @@
 package com.campusflow.controller;
 
-import com.campusflow.entity.Faculty;
+import com.campusflow.dto.faculty.FacultyRequest;
+import com.campusflow.dto.faculty.FacultyResponse;
 import com.campusflow.service.FacultyService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,33 +21,30 @@ public class FacultyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Faculty>> getAllFaculty() {
+    public ResponseEntity<List<FacultyResponse>> getAllFaculty() {
         return ResponseEntity.ok(facultyService.getAllFaculty());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Faculty> getFacultyById(@PathVariable Long id) {
+    public ResponseEntity<FacultyResponse> getFacultyById(@PathVariable Long id) {
         return ResponseEntity.ok(facultyService.getFacultyById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Faculty> createFaculty(@RequestBody Faculty faculty) {
-        return new ResponseEntity<>(facultyService.createFaculty(faculty), HttpStatus.CREATED);
+    public ResponseEntity<FacultyResponse> createFaculty(@Valid @RequestBody FacultyRequest request) {
+        FacultyResponse createdFaculty = facultyService.createFaculty(request);
+        return new ResponseEntity<>(createdFaculty, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Faculty> updateFaculty(@PathVariable Long id, @RequestBody Faculty faculty) {
-        return ResponseEntity.ok(facultyService.updateFaculty(id, faculty));
+    public ResponseEntity<FacultyResponse> updateFaculty(@PathVariable Long id, @Valid @RequestBody FacultyRequest request) {
+        FacultyResponse updatedFaculty = facultyService.updateFaculty(id, request);
+        return ResponseEntity.ok(updatedFaculty);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFaculty(@PathVariable Long id) {
         facultyService.deleteFaculty(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleNotFound(IllegalArgumentException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 }
